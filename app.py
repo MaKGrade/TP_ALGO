@@ -31,7 +31,7 @@ def allowed_file(filename):
 @app.route('/')
 def interface():
     try:
-        return render_template('interface.html')
+        return render_template('Front.html')
     except Exception as e:
         logger.error(f"Erreur lors de l'affichage de l'interface: {str(e)}", exc_info=True)
         return jsonify({"error":str(e)}),500
