@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Détecteur de Plagiat</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .dropzone {
+        border: 2px dashed #4a5568;
+        transition: all 0.3s ease;
+      }
+      .dropzone.dragover {
+        border-color: #48bb78;
+        background-color: #f0fff4;
+      }
+      .result-card {
+        transition: all 0.3s ease;
+      }
+      .progress-bar {
+        transition: width 0.3s ease;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .animate-spin {
+        animation: spin 1s linear infinite;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+      <!-- En-tête -->
+      <header class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-gray-800 mb-2">
+          Détecteur de Plagiat
+        </h1>
+        <p class="text-gray-600">Analysez la similarité entre vos documents</p>
+      </header>
+
+      <!-- Zone de dépôt des fichiers -->
+      <div class="grid md:grid-cols-2 gap-8 mb-8">
+        <!-- Document 1 -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">Document 1</h2>
+          <div
+            id="dropzone1"
+            class="dropzone rounded-lg p-8 text-center cursor-pointer mb-4"
+          >
+            <input
+              type="file"
+              id="file1"
+              class="hidden"
+              accept=".txt,.pdf,.doc,.docx,.html,.md"
+            />
+            <p class="text-gray-600">
+              Glissez votre fichier ici ou cliquez pour sélectionner. Format
+              prit en consideration : [ '.txt', '.doc', '.docx', '.pdf', '.tex',
+              '.html', '.md', '.xls', '.xlsx', '.ppt', '.pptx', '.py', '.java',
+              '.cpp', '.js', '.ts']
+            </p>
+          </div>
+          <div id="file1Info" class="hidden">
+            <div
+              class="flex items-center justify-between bg-gray-50 p-3 rounded"
+            >
+              <span class="file-name text-sm text-gray-600"></span>
+              <button
+                class="text-red-500 hover:text-red-700"
+                onclick="removeFile(1)"
+              >
+                Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Document 2 -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">Document 2</h2>
+          <div
+            id="dropzone2"
+            class="dropzone rounded-lg p-8 text-center cursor-pointer mb-4"
+          >
+            <input
+              type="file"
+              id="file2"
+              class="hidden"
+              accept=".txt,.pdf,.doc,.docx,.html,.md"
+            />
+            <p class="text-gray-600">
+              Glissez votre fichier ici ou cliquez pour sélectionner. Format
+              prit en consideration : [ '.txt', '.doc', '.docx', '.pdf', '.tex',
+              '.html', '.md', '.xls', '.xlsx', '.ppt', '.pptx', '.py', '.java',
+              '.cpp', '.js', '.ts']
+            </p>
+          </div>
+          <div id="file2Info" class="hidden">
+            <div
+              class="flex items-center justify-between bg-gray-50 p-3 rounded"
+            >
+              <span class="file-name text-sm text-gray-600"></span>
+              <button
+                class="text-red-500 hover:text-red-700"
+                onclick="removeFile(2)"
+              >
+                Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bouton d'analyse -->
+      <div class="text-center mb-12">
+        <button
+          id="analyzeBtn"
+          class="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled
+        >
+          Analyser les documents
+        </button>
+      </div>
+
+      <!-- Loader -->
+      <div id="loader" class="hidden text-center mb-8">
+        <div class="inline-block">
+          <svg
+            class="animate-spin h-8 w-8 text-blue-600"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+        </div>
+        <p class="text-gray-600 mt-2">Analyse en cours...</p>
+      </div>
+
+      <!-- Résultats -->
+      <div id="results" class="hidden">
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+          <h2 class="text-2xl font-bold text-gray-800 mb-6">
+            Résultats de l'analyse
+          </h2>
+
+          <!-- Score global -->
+          <div class="mb-8">
+            <h3 class="text-lg font-semibold text-gray-700 mb-4">
+              Score global de similarité
+            </h3>
+            <div class="relative pt-1">
+              <div class="flex mb-2 items-center justify-between">
+                <div>
+                  <span
+                    id="globalScore"
+                    class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-white bg-blue-600"
+                  >
+                    0%
+                  </span>
+                </div>
+              </div>
+              <div
+                class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200"
+              >
+                <div
+                  id="globalScoreBar"
+                  class="progress-bar shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-600"
+                  style="width: 0%"
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Scores détaillés -->
+          <div class="grid md:grid-cols-2 gap-6">
+            <!-- Fingerprint -->
+            <div class="result-card bg-gray-50 rounded-lg p-4">
+              <h4 class="font-semibold text-gray-700 mb-2">
+                Score Fingerprint
+              </h4>
+              <div class="relative pt-1">
+                <div
+                  class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200"
+                >
+                  <div
+                    id="fingerprintScoreBar"
+                    class="progress-bar shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500"
+                    style="width: 0%"
+                  ></div>
+                </div>
+                <span id="fingerprintScore" class="text-sm text-gray-600"
+                  >0%</span
+                >
+              </div>
+            </div>
+
+            <!-- N-grammes -->
+            <div class="result-card bg-gray-50 rounded-lg p-4">
+              <h4 class="font-semibold text-gray-700 mb-2">Score N-grammes</h4>
+              <div class="relative pt-1">
+                <div
+                  class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200"
+                >
+                  <div
+                    id="ngramScoreBar"
+                    class="progress-bar shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-yellow-500"
+                    style="width: 0%"
+                  ></div>
+                </div>
+                <span id="ngramScore" class="text-sm text-gray-600">0%</span>
+              </div>
+            </div>
+
+            <!-- LCS -->
+            <div class="result-card bg-gray-50 rounded-lg p-4">
+              <h4 class="font-semibold text-gray-700 mb-2">Score LCS</h4>
+              <div class="relative pt-1">
+                <div
+                  class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200"
+                >
+                  <div
+                    id="lcsScoreBar"
+                    class="progress-bar shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-purple-500"
+                    style="width: 0%"
+                  ></div>
+                </div>
+                <span id="lcsScore" class="text-sm text-gray-600">0%</span>
+              </div>
+            </div>
+
+            <!-- Cosinus -->
+            <div class="result-card bg-gray-50 rounded-lg p-4">
+              <h4 class="font-semibold text-gray-700 mb-2">Score Cosinus</h4>
+              <div class="relative pt-1">
+                <div
+                  class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200"
+                >
+                  <div
+                    id="cosineScoreBar"
+                    class="progress-bar shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500"
+                    style="width: 0%"
+                  ></div>
+                </div>
+                <span id="cosineScore" class="text-sm text-gray-600">0%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Verdict -->
+          <div id="verdict" class="mt-8 p-4 rounded-lg text-center"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let files = {
+        file1: null,
+        file2: null,
+      };
+
+      function initializeDropZones() {
+        const dropzones = document.querySelectorAll(".dropzone");
+
+        dropzones.forEach((dropzone) => {
+          const input = dropzone.querySelector("input");
+          const fileNum = input.id.slice(-1);
+
+          dropzone.addEventListener("click", () => input.click());
+
+          dropzone.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            dropzone.classList.add("dragover");
+          });
+
+          dropzone.addEventListener("dragleave", () => {
+            dropzone.classList.remove("dragover");
+          });
+
+          dropzone.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dropzone.classList.remove("dragover");
+            handleFile(e.dataTransfer.files[0], fileNum);
+          });
+
+          input.addEventListener("change", (e) => {
+            handleFile(e.target.files[0], fileNum);
+          });
+        });
+      }
+
+      function handleFile(file, fileNum) {
+        try {
+          const fileInfo = document.getElementById(`file${fileNum}Info`);
+          const fileName = fileInfo.querySelector(".file-name");
+
+          // Validation basique du type de fichier
+          const allowedTypes = [
+            "text/plain",
+            "application/pdf",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "text/html",
+            "text/markdown",
+          ];
+
+          if (!allowedTypes.includes(file.type)) {
+            throw new Error("Type de fichier non supporté");
+          }
+
+          files[`file${fileNum}`] = file;
+
+          fileName.textContent = `${file.name} (${formatFileSize(file.size)})`;
+          fileInfo.classList.remove("hidden");
+
+          updateAnalyzeButton();
+        } catch (error) {
+          alert(error.message);
+          removeFile(fileNum);
+        }
+      }
+
+      function formatFileSize(bytes) {
+        if (bytes === 0) return "0 B";
+        const k = 1024;
+        const sizes = ["B", "KB", "MB", "GB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+      }
+
+      function removeFile(fileNum) {
+        files[`file${fileNum}`] = null;
+        const fileInfo = document.getElementById(`file${fileNum}Info`);
+        const input = document.getElementById(`file${fileNum}`);
+
+        fileInfo.classList.add("hidden");
+        input.value = "";
+
+        updateAnalyzeButton();
+      }
+
+      function updateAnalyzeButton() {
+        const analyzeBtn = document.getElementById("analyzeBtn");
+        analyzeBtn.disabled = !(files.file1 && files.file2);
+      }
+
+      async function analyzePlagiarism() {
+        if (!files.file1 || !files.file2) return;
+
+        // Afficher le loader
+        document.getElementById("loader").classList.remove("hidden");
+        document.getElementById("results").classList.add("hidden");
+        document.getElementById("analyzeBtn").disabled = true;
+
+        try {
+          // Préparation des données
+          const formData = new FormData();
+          formData.append("file1", files.file1);
+          formData.append("file2", files.file2);
+
+          // Appel à l'API
+          const response = await fetch("http://localhost:5000/api/analyze", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            alert(`Erreur API : ${errorData.error || "Erreur inconnue"}`);
+            throw new Error(errorData.error || "Erreur inconnue");
+          }
+
+          // En cas de succès, afficher les scores
+          const results = await response.json(); // Lecture unique de la réponse JSON
+
+          if (results.final_score === 0) {
+            alert(
+              "Les fichiers ne contiennent pas de texte ou sont trop différents pour être comparés."
+            );
+          }
+
+          console.log("Résultats reçus :", results); // Log les résultats
+          displayResults(results);
+        } catch (error) {
+          console.error("Erreur lors de l'analyse :", error);
+          const results = document.getElementById("results");
+          results.innerHTML = `
+      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <strong class="font-bold">Erreur!</strong>
+        <span class="block sm:inline">${error.message}</span>
+      </div>
+    `;
+          results.classList.remove("hidden");
+        } finally {
+          // Cacher le loader
+          document.getElementById("loader").classList.add("hidden");
+          document.getElementById("analyzeBtn").disabled = false;
+        }
+      }
+
+      // Ajouter une fonction utilitaire pour gérer les erreurs réseau
+      function handleNetworkError(error) {
+        console.error("Erreur réseau:", error);
+        return {
+          error: "Erreur de connexion au serveur. Veuillez réessayer.",
+        };
+      }
+
+      // Ajouter une fonction pour valider les fichiers avant l'envoi
+      function validateFiles() {
+        const allowedTypes = [
+          "text/plain",
+          "application/pdf",
+          "application/msword",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          "text/html",
+          "text/markdown",
+        ];
+
+        if (
+          !allowedTypes.includes(files.file1.type) ||
+          !allowedTypes.includes(files.file2.type)
+        ) {
+          throw new Error(
+            "Type de fichier non supporté. Formats acceptés : TXT, PDF, DOC, DOCX, HTML, MD"
+          );
+        }
+
+        if (
+          files.file1.size > 16 * 1024 * 1024 ||
+          files.file2.size > 16 * 1024 * 1024
+        ) {
+          throw new Error("Taille de fichier maximale dépassée (16 MB)");
+        }
+      }
+
+      function simulateAnalysis() {
+        // Cette fonction simule l'analyse. À remplacer par l'appel API réel.
+        return {
+          final_score: Math.random(),
+          fingerprint_score: Math.random(),
+          ngram_score: Math.random(),
+          lcs_score: Math.random(),
+          cosine_score: Math.random(),
+          is_plagiarism: Math.random() > 0.5,
+        };
+      }
+
+      function displayResults(results) {
+        console.log("Résultats reçus :", results); // Log les résultats
+        if (!results) {
+          console.error("Aucun résultat reçu.");
+          return;
+        }
+        -(
+          // Mettre à jour les scores
+          updateScore("globalScore", "globalScoreBar", results.final_score)
+        );
+        updateScore(
+          "fingerprintScore",
+          "fingerprintScoreBar",
+          results.fingerprint_score
+        );
+        updateScore("ngramScore", "ngramScoreBar", results.ngram_score);
+        updateScore("lcsScore", "lcsScoreBar", results.lcs_score);
+        updateScore("cosineScore", "cosineScoreBar", results.cosine_score);
+
+        // Afficher le verdict
+        const verdict = document.getElementById("verdict");
+        if (results.is_plagiarism) {
+          verdict.className =
+            "mt-8 p-4 rounded-lg text-center bg-red-100 text-red-700";
+          verdict.innerHTML = `
+            <h3 class="text-xl font-bold mb-2">Plagiat Détecté</h3>
+            <p>Un niveau significatif de similarité a été détecté entre les documents.</p>
+        `;
+        } else {
+          verdict.className =
+            "mt-8 p-4 rounded-lg text-center bg-green-100 text-green-700";
+          verdict.innerHTML = `
+            <h3 class="text-xl font-bold mb-2">Pas de Plagiat</h3>
+            <p>Les documents présentent un niveau de similarité acceptable.</p>
+        `;
+        }
+
+        // Afficher les résultats
+        document.getElementById("results").classList.remove("hidden");
+      }
+      function updateScore(scoreId, barId, value) {
+        const percentage = Math.round(value * 100);
+        document.getElementById(scoreId).textContent = `${percentage}%`;
+        document.getElementById(barId).style.width = `${percentage}%`;
+      }
+
+      // Initialisation
+      document.addEventListener("DOMContentLoaded", () => {
+        initializeDropZones();
+        document
+          .getElementById("analyzeBtn")
+          .addEventListener("click", analyzePlagiarism);
+      });
+    </script>
+  </body>
+</html>
