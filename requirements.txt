@@ -3,6 +3,7 @@ flask_cors
 Werkzeug
 numpy
 tqdm
+nltk
 beautifulsoup4
 markdown
 python-docx
