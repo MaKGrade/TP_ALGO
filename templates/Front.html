@@ -376,7 +376,7 @@
           formData.append("file2", files.file2);
 
           // Appel à l'API
-          const response = await fetch("http://localhost:5000/api/analyze", {
+          const response = await fetch("https://detecteur-de-plagiat.onrender.com/api/analyze", {
             method: "POST",
             body: formData,
           });
