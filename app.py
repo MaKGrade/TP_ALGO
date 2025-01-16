@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import os
@@ -28,6 +28,14 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB limit
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+@app.route('/')
+def interface():
+    try:
+        return render_template('interface.html')
+    except Exception as e:
+        logger.error(f"Erreur lors de l'affichage de l'interface: {str(e)}", exc_info=True)
+        return jsonify({"error":str(e)}),500
+                        
 @app.route('/api/analyze', methods=['POST'])
 def analyze_plagiarism():
     try:
