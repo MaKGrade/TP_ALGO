@@ -556,7 +556,7 @@ class ReportGenerator:
 #     report_generator = ReportGenerator()
     
 #     try:
-#         # Détection du plagiat
+#         # La Détection du plagiat
 #         results = detector.detect_plagiarism('document1.txt', 'document2.txt')
         
 #         # Génération et affichage du rapport
