@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InspireTech - Boutique Informatique</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    header {
+      background-color: #4CAF50;
+      color: white;
+      text-align: center;
+      padding: 1.5rem 0;
+    }
+
+    header h1 {
+      margin: 0;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+    }
+
+    .card img {
+      width: 100%;
+      height: auto;
+    }
+
+    .card-content {
+      padding: 15px;
+    }
+
+    .card-content h3 {
+      margin: 0 0 10px;
+      font-size: 1.2rem;
+    }
+
+    .card-content p {
+      color: #555;
+      font-size: 0.9rem;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      margin-top: 10px;
+      background-color: #4CAF50;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      text-align: center;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>InspireTech</h1>
+    <p>Découvrez les meilleurs outils informatiques pour vos projets</p>
+  </header>
+
+  <div class="container">
+    <div class="card">
+      <img src="https://via.placeholder.com/300x200" alt="Produit 1">
+      <div class="card-content">
+        <h3>Ordinateur Portable</h3>
+        <p>Performant et léger, idéal pour le travail et le loisir.</p>
+        <a href="#" class="btn">Voir le produit</a>
+      </div>
+    </div>
+    <div class="card">
+      <img src="https://via.placeholder.com/300x200" alt="Produit 2">
+      <div class="card-content">
+        <h3>Casque Audio</h3>
+        <p>Un son immersif pour une expérience audio ultime.</p>
+        <a href="#" class="btn">Voir le produit</a>
+      </div>
+    </div>
+    <div class="card">
+      <img src="https://via.placeholder.com/300x200" alt="Produit 3">
+      <div class="card-content">
+        <h3>Clavier Mécanique</h3>
+        <p>Un clavier robuste pour des heures de productivité.</p>
+        <a href="#" class="btn">Voir le produit</a>
+      </div>
+    </div>
+    <div class="card">
+      <img src="https://via.placeholder.com/300x200" alt="Produit 4">
+      <div class="card-content">
+        <h3>Souris Gaming</h3>
+        <p>Une précision optimale pour vos sessions de jeu.</p>
+        <a href="#" class="btn">Voir le produit</a>
+      </div>
+    </div>
+  </div>
+
+</body>
+
+</html>
