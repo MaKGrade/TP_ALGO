@@ -76,4 +76,4 @@ def analyze_plagiarism():
 
 if __name__ == '__main__':
     logger.info(f"Starting Flask server. Upload folder: {UPLOAD_FOLDER}")
-    app.run(debug=True, port=5000)
+    app.run(debug=False, port=5000)
